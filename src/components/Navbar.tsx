@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActiveTab } from '../types';
-import { PackageCheck, RefreshCw, FileSpreadsheet, Download } from 'lucide-react';
+import { BookOpen, RefreshCw, FileSpreadsheet, Download } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -24,13 +24,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Zone 1: Single text element wordmark */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="w-9 h-9 rounded-lg bg-cyan-600 flex items-center justify-center text-white font-bold shadow-lg shadow-cyan-900/20">
-              <PackageCheck className="w-5 h-5" />
+              <BookOpen className="w-5 h-5" />
             </div>
             <div>
               <span className="text-lg font-bold tracking-tight text-white whitespace-nowrap">
-                WMS <span className="text-cyan-400 font-normal">Phase 1</span>
+                BookWMS <span className="text-cyan-400 font-normal">Phase 1</span>
               </span>
-              <p className="text-[10px] text-slate-400 tracking-wider uppercase font-mono">Order Management</p>
+              <p className="text-[10px] text-slate-400 tracking-wider uppercase font-mono">ISBN Order Management</p>
             </div>
           </div>
 
@@ -64,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`}
             >
-              Inventory Ledger
+              Book Catalog Ledger
             </button>
           </nav>
 

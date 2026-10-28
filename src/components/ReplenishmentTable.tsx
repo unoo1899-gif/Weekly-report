@@ -33,8 +33,8 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
 
   const filteredItems = evaluatedItems.filter((item) => {
     const matchesSearch =
-      item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.isbn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.supplier.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (filterStatus === 'insufficient') return matchesSearch && item.isInsufficient;
@@ -54,7 +54,7 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-semibold text-white">Current Stock Balance</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Upload latest warehouse physical count data.</p>
+              <p className="text-xs text-slate-400 mt-0.5">Upload latest warehouse physical count data by ISBN.</p>
             </div>
           </div>
           <button
@@ -74,7 +74,7 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-semibold text-white">Extra PO Stock (In Transit)</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Upload active purchase order deliveries.</p>
+              <p className="text-xs text-slate-400 mt-0.5">Upload active purchase order deliveries by ISBN.</p>
             </div>
           </div>
           <button
@@ -96,7 +96,7 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
               <Filter className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Stock Replenishment & Order Management</h2>
+              <h2 className="text-lg font-bold text-white">Book Replenishment & Order Management</h2>
               <p className="text-xs text-slate-400">Formula: Min Required Stock - Stock Balance - Extra PO Stock</p>
             </div>
           </div>
@@ -135,7 +135,7 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search SKU or supplier..."
+                placeholder="Search ISBN or title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full sm:w-64 bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
@@ -149,35 +149,35 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-950/60 text-[11px] font-mono text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                <th className="py-3 px-6">SKU / Item</th>
+                <th className="py-3 px-6">ISBN / Title</th>
                 <th className="py-3 px-6 text-right">Min Required</th>
                 <th className="py-3 px-6 text-right">Stock Balance</th>
                 <th className="py-3 px-6 text-right">Extra PO Stock</th>
                 <th className="py-3 px-6 text-right font-semibold text-cyan-400">Calculation Result</th>
-                <th className="py-3 px-6">Supplier / Action Status</th>
+                <th className="py-3 px-6">Publisher / Action Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
               {filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-500">
-                    No matching inventory records found.
+                    No matching book inventory records found.
                   </td>
                 </tr>
               ) : (
                 filteredItems.map((item) => {
                   return (
                     <tr
-                      key={item.id}
+                      key={item.isbn}
                       className={`transition-colors hover:bg-slate-800/40 ${
                         item.isInsufficient ? 'bg-amber-950/10' : ''
                       }`}
                     >
-                      {/* SKU / Item */}
+                      {/* ISBN / Title */}
                       <td className="py-4 px-6">
-                        <div className="font-mono text-cyan-400 font-semibold">{item.id}</div>
-                        <div className="text-slate-100 font-medium mt-0.5">{item.name}</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">Supplier: {item.supplier}</div>
+                        <div className="font-mono text-cyan-400 font-semibold">{item.isbn}</div>
+                        <div className="text-slate-100 font-medium mt-0.5">{item.title}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">Publisher: {item.supplier}</div>
                       </td>
 
                       {/* Min Required Stock */}
@@ -233,7 +233,7 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
         <div className="p-6 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between">
           <div className="text-xs text-slate-400">
             Showing <strong className="text-white">{filteredItems.length}</strong> of{' '}
-            <strong className="text-white">{items.length}</strong> SKUs
+            <strong className="text-white">{items.length}</strong> Book Titles
           </div>
           <button
             onClick={onOpenExportModal}

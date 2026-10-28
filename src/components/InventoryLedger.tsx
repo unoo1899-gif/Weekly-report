@@ -6,7 +6,7 @@ interface InventoryLedgerProps {
   items: InventoryItem[];
   onAddItem: (item: InventoryItem) => void;
   onUpdateItem: (item: InventoryItem) => void;
-  onDeleteItem: (id: string) => void;
+  onDeleteItem: (isbn: string) => void;
 }
 
 export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
@@ -17,55 +17,55 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingIsbn, setEditingIsbn] = useState<string | null>(null);
 
   // New item form state
   const [newItem, setNewItem] = useState<InventoryItem>({
-    id: `SKU-00${items.length + 1}`,
-    name: '',
-    category: 'Assembly Components',
+    isbn: '978-0134000000',
+    title: '',
+    category: 'Computer Science',
     minRequiredStock: 100,
     stockBalance: 50,
     extraPoStock: 0,
-    unitCost: 10.00,
-    supplier: 'Default Supplier'
+    unitCost: 29.99,
+    supplier: 'Publisher Name'
   });
 
   const [editItemState, setEditItemState] = useState<InventoryItem | null>(null);
 
   const filteredItems = items.filter(
     (item) =>
-      item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.isbn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.supplier.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItem.id || !newItem.name) return;
+    if (!newItem.isbn || !newItem.title) return;
     onAddItem(newItem);
     setIsAdding(false);
     setNewItem({
-      id: `SKU-00${items.length + 2}`,
-      name: '',
-      category: 'Assembly Components',
+      isbn: `978-0134${Math.floor(100000 + Math.random() * 900000)}`,
+      title: '',
+      category: 'Computer Science',
       minRequiredStock: 100,
       stockBalance: 50,
       extraPoStock: 0,
-      unitCost: 10.00,
-      supplier: 'Default Supplier'
+      unitCost: 29.99,
+      supplier: 'Publisher Name'
     });
   };
 
   const handleStartEdit = (item: InventoryItem) => {
-    setEditingId(item.id);
+    setEditingIsbn(item.isbn);
     setEditItemState({ ...item });
   };
 
   const handleSaveEdit = () => {
     if (editItemState) {
       onUpdateItem(editItemState);
-      setEditingId(null);
+      setEditingIsbn(null);
       setEditItemState(null);
     }
   };
@@ -80,8 +80,8 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
               <Layers className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Full Inventory Ledger</h2>
-              <p className="text-xs text-slate-400">Manage all SKU attributes, unit costs, and supplier details.</p>
+              <h2 className="text-lg font-bold text-white">Full Book Catalog Ledger</h2>
+              <p className="text-xs text-slate-400">Manage all ISBN attributes, unit costs, and publisher details.</p>
             </div>
           </div>
 
@@ -90,7 +90,7 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search ledger..."
+                placeholder="Search catalog..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
@@ -101,34 +101,34 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
               className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-cyan-900/30 transition-all whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
-              <span>Add SKU</span>
+              <span>Add Book</span>
             </button>
           </div>
         </div>
 
-        {/* Add SKU Modal / Form Row */}
+        {/* Add Book Modal / Form Row */}
         {isAdding && (
           <form onSubmit={handleCreateSubmit} className="p-6 bg-slate-950/80 border-b border-slate-800 space-y-4">
-            <h3 className="text-sm font-semibold text-white">Add New Inventory SKU</h3>
+            <h3 className="text-sm font-semibold text-white">Add New Book to Catalog</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">SKU Code</label>
+                <label className="block text-[11px] font-medium text-slate-400 mb-1">ISBN</label>
                 <input
                   type="text"
                   required
-                  value={newItem.id}
-                  onChange={(e) => setNewItem({ ...newItem, id: e.target.value })}
+                  value={newItem.isbn}
+                  onChange={(e) => setNewItem({ ...newItem, isbn: e.target.value })}
                   className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Item Description</label>
+                <label className="block text-[11px] font-medium text-slate-400 mb-1">Book Title</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Heavy Duty Valve"
-                  value={newItem.name}
-                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                  placeholder="e.g. Clean Architecture"
+                  value={newItem.title}
+                  onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                   className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
                 />
               </div>
@@ -142,7 +142,7 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Supplier Name</label>
+                <label className="block text-[11px] font-medium text-slate-400 mb-1">Publisher / Supplier</label>
                 <input
                   type="text"
                   value={newItem.supplier}
@@ -204,7 +204,7 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
                 type="submit"
                 className="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-cyan-900/30"
               >
-                Save SKU
+                Save Book
               </button>
             </div>
           </form>
@@ -215,33 +215,33 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-950/60 text-[11px] font-mono text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                <th className="py-3 px-6">SKU Code</th>
-                <th className="py-3 px-6">Item Name</th>
+                <th className="py-3 px-6">ISBN</th>
+                <th className="py-3 px-6">Book Title</th>
                 <th className="py-3 px-6">Category</th>
                 <th className="py-3 px-6 text-right">Min Stock</th>
                 <th className="py-3 px-6 text-right">Balance</th>
                 <th className="py-3 px-6 text-right">Extra PO</th>
                 <th className="py-3 px-6 text-right">Unit Cost</th>
-                <th className="py-3 px-6">Supplier</th>
+                <th className="py-3 px-6">Publisher</th>
                 <th className="py-3 px-6 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
               {filteredItems.map((item) => {
-                const isEditing = editingId === item.id;
+                const isEditing = editingIsbn === item.isbn;
                 return (
-                  <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-4 px-6 font-mono text-cyan-400 font-medium">{item.id}</td>
+                  <tr key={item.isbn} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="py-4 px-6 font-mono text-cyan-400 font-medium">{item.isbn}</td>
                     <td className="py-4 px-6 text-slate-100 font-medium">
                       {isEditing && editItemState ? (
                         <input
                           type="text"
-                          value={editItemState.name}
-                          onChange={(e) => setEditItemState({ ...editItemState, name: e.target.value })}
+                          value={editItemState.title}
+                          onChange={(e) => setEditItemState({ ...editItemState, title: e.target.value })}
                           className="w-full bg-slate-950 border border-cyan-500 rounded px-2 py-1 text-white text-xs"
                         />
                       ) : (
-                        item.name
+                        item.title
                       )}
                     </td>
                     <td className="py-4 px-6 text-slate-400">
@@ -328,7 +328,7 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
                             <Check className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => setEditingId(null)}
+                            onClick={() => setEditingIsbn(null)}
                             className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors"
                             title="Cancel"
                           >
@@ -345,7 +345,7 @@ export const InventoryLedger: React.FC<InventoryLedgerProps> = ({
                             <Edit2 className="w-3.5 h-3.5 text-cyan-400" />
                           </button>
                           <button
-                            onClick={() => onDeleteItem(item.id)}
+                            onClick={() => onDeleteItem(item.isbn)}
                             className="p-1.5 bg-slate-800 hover:bg-slate-700 text-rose-400 rounded-lg transition-colors border border-slate-700"
                             title="Delete"
                           >

@@ -11,7 +11,7 @@ import { ExportModal } from './components/ExportModal';
 
 export default function App() {
   const [items, setItems] = useState<InventoryItem[]>(() => {
-    const saved = localStorage.getItem('wms_phase1_inventory');
+    const saved = localStorage.getItem('book_wms_phase1_inventory');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -28,7 +28,7 @@ export default function App() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('wms_phase1_inventory', JSON.stringify(items));
+    localStorage.setItem('book_wms_phase1_inventory', JSON.stringify(items));
   }, [items]);
 
   const handleOpenUploadModal = (type: UploadType) => {
@@ -36,10 +36,10 @@ export default function App() {
     setUploadModalOpen(true);
   };
 
-  const handleUpdateStock = (type: UploadType, updates: { id: string; qty: number }[]) => {
+  const handleUpdateStock = (type: UploadType, updates: { isbn: string; qty: number }[]) => {
     setItems((prevItems) => {
       return prevItems.map((item) => {
-        const found = updates.find((u) => u.id.toLowerCase() === item.id.toLowerCase());
+        const found = updates.find((u) => u.isbn.toLowerCase() === item.isbn.toLowerCase());
         if (found) {
           if (type === 'balance') {
             return { ...item, stockBalance: found.qty, lastStockUpdate: new Date().toISOString().slice(0, 16).replace('T', ' ') };
@@ -52,9 +52,9 @@ export default function App() {
     });
   };
 
-  const handleUpdateMinStock = (id: string, newMinStock: number) => {
+  const handleUpdateMinStock = (isbn: string, newMinStock: number) => {
     setItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, minRequiredStock: newMinStock } : item))
+      prevItems.map((item) => (item.isbn === isbn ? { ...item, minRequiredStock: newMinStock } : item))
     );
   };
 
@@ -63,17 +63,17 @@ export default function App() {
   };
 
   const handleUpdateItem = (updatedItem: InventoryItem) => {
-    setItems((prev) => prev.map((item) => (item.id === updatedItem.id ? updatedItem : item)));
+    setItems((prev) => prev.map((item) => (item.isbn === updatedItem.isbn ? updatedItem : item)));
   };
 
-  const handleDeleteItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  const handleDeleteItem = (isbn: string) => {
+    setItems((prev) => prev.filter((item) => item.isbn !== isbn));
   };
 
   const handleResetData = () => {
-    if (window.confirm('Reset all inventory data and minimum stock presets to initial demo state?')) {
+    if (window.confirm('Reset all book inventory data and minimum stock presets to initial demo state?')) {
       setItems(INITIAL_INVENTORY_ITEMS);
-      localStorage.removeItem('wms_phase1_inventory');
+      localStorage.removeItem('book_wms_phase1_inventory');
     }
   };
 
@@ -118,7 +118,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-900/40 py-6 text-center text-xs text-slate-400">
-        <p>WMS Phase 1 Order Management & Stock Replenishment Engine · Built with Google AI Studio</p>
+        <p>BookWMS Phase 1 ISBN Order Management & Stock Replenishment Engine · Built with Google AI Studio</p>
       </footer>
 
       {/* Modals */}

@@ -1,58 +1,21 @@
-# WMS Phase 1 - Order Management & Stock Replenishment
+# WMS Phase 1 - Book Inventory & ISBN Replenishment Update
 
-## Overview & Core Concept
-This application implements **Phase 1** of the Warehouse Management System (WMS), focusing on automated **Order Management and Stock Replenishment Calculations**. It allows warehouse operators and procurement managers to:
-1. View and edit **Minimum Required Stock (Par Levels)** preset in the system.
-2. Use **2 prominent upload buttons/icons** to import **Stock Balance** and **Extra PO Stock** files (with CSV file parsing and mock sample data generators).
-3. Run a real-time calculation engine for each SKU:
-   $$\text{Net Deficit / Order Quantity} = \text{Minimum Required Stock} - \text{Stock Balance} - \text{Extra PO Stock}$$
-4. Instantly identify SKUs where $\text{Result} > 0$ with clear alert badges stating **"Qty not sufficient and need to order from supplier"** along with exact reorder quantities.
-5. Export purchase orders and replenishment summaries as CSV or printable reports.
+## Overview & Core Changes
+This update adapts the Warehouse Management System (WMS) Phase 1 application for a bookstore / publication inventory workflow:
+1. **SKU Code** $\rightarrow$ **ISBN**: Unique book identifier (e.g., 978-0132350884).
+2. **Item Name / Description** $\rightarrow$ **Title**: Book title and subtitle.
+3. **Preset Minimum Stock**: Maintained with par levels for each book title.
+4. **Upload & Export Hubs**: Updated to parse and export ISBN and Title headers.
 
 ---
 
-## User Experience & Visual Design
-- **Aesthetic Direction**: Clean enterprise SaaS dashboard inspired by `references/3_saas_dashboard.md`. Neutral slate background (`#0F172A` / `#F8FAFC`), crisp typography (`Plus Jakarta Sans` + `JetBrains Mono` for tabular numerals), and semantic status signaling (Green for sufficient, Crimson for insufficient stock).
-- **Core Layout & Navigation**:
-  - **Top Bar**: Clean wordmark, quick stats overview, and primary export/reset actions.
-  - **Summary Metric Cards**: Total SKUs, Sufficient Items, Items Needing Order, Total Deficit Quantity.
-  - **Data Management Hub**:
-    - **Preset Minimum Stock Table**: Inline editable Par levels and SKU details.
-    - **Upload Hub**: 2 dedicated file upload widgets (Stock Balance & Extra PO Stock) with drag-and-drop, sample CSV download, and instant parsing.
-  - **Replenishment Results Table**: Live calculated data grid with sorting, search, status badges (`Qty not sufficient, need to order from supplier`), and supplier order generation.
-
----
-
-## Key Product Decisions & Trade-Offs
-- **Client-Side CSV Parsing**: Built-in CSV parser supporting standard headers (`sku`, `name`, `qty` / `balance` / `po`) with robust fallback sample data for immediate testing without requiring external file setup.
-- **Persistent State**: Utilizes `localStorage` to preserve inventory adjustments, minimum stock presets, and uploaded balances across page reloads.
-
----
-
-## Technical Architecture & Data Strategy
-
-```
-┌────────────────────────────────────────────────────────┐
-│                      WMS App                           │
-│  (State: SKUs, Balances, PO Stock, Filters, Uploads)   │
-└───────────┬───────────────────┬────────────────────┬───┘
-            │                   │                    │
-            ▼                   ▼                    ▼
-   ┌─────────────────┐ ┌──────────────────┐ ┌─────────────────┐
-   │ Preset Min      │ │ Upload Hub (2    │ │ Replenishment   │
-   │ Stock Table     │ │ Icons: Balance   │ │ Calculation     │
-   │ (Inline Edit)   │ │ & Extra PO)      │ │ Engine & Status │
-   └─────────────────┘ └──────────────────┘ └─────────────────┘
-                                                     │
-                                                     ▼
-                                            ┌─────────────────┐
-                                            │ Supplier Order  │
-                                            │ Export & Action │
-                                            └─────────────────┘
-```
-
-- **Data Model**:
-  - `SKU`: `{ id: string; name: string; category: string; minRequiredStock: number; stockBalance: number; extraPoStock: number; unitCost?: number; supplier?: string }`
-- **Calculation Formula**:
-  - `deficit = Math.max(0, sku.minRequiredStock - sku.stockBalance - sku.extraPoStock)`
-  - `status = deficit > 0 ? 'Insufficient - Order Required' : 'Sufficient'`
+## Technical & UI Adjustments
+- **Types (`src/types.ts`)**: Rename `id` to `isbn` and `name` to `title`.
+- **Initial Data (`src/data/initialData.ts`)**: Replace sample industrial widgets with popular book titles and valid ISBN-13 numbers.
+- **Components**:
+  - `Navbar.tsx`: Update subtitle to "Book Inventory & ISBN Replenishment".
+  - `MinStockTable.tsx`: Display ISBN and Book Title with inline par level editing.
+  - `ReplenishmentTable.tsx`: Display ISBN, Book Title, Supplier/Publisher, Min Required, Balance, Extra PO, and Deficit Calculation with supplier order badge.
+  - `InventoryLedger.tsx`: Full CRUD for book inventory items using ISBN and Title.
+  - `UploadModal.tsx`: Support CSV upload for ISBN, Title, and Quantities.
+  - `ExportModal.tsx`: Generate supplier purchase order reports with ISBN and Title headers.

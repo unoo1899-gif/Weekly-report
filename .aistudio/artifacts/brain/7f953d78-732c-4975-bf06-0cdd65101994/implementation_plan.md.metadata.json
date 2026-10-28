@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan for WMS Phase 1 Order Management application featuring preset minimum required stock management, upload hubs for Stock Balance and Extra PO Stock files, real-time calculation engine (Required Stock - Stock Balance - Extra PO Stock), deficit flagging with supplier order recommendations, and PO export capabilities.",
-  "updatedAt":  "2026-10-28T02:29:37.168958350Z",
+  "summary":  "Implementation plan to update WMS Phase 1 terminology: change SKU Code to ISBN, Item Name to Title, update sample book inventory data, and adapt all tables, upload parsers, and export tools accordingly.",
+  "updatedAt":  "2026-10-28T03:16:23.849115461Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

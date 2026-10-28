@@ -7,7 +7,7 @@ interface UploadModalProps {
   onClose: () => void;
   uploadType: UploadType;
   items: InventoryItem[];
-  onUpdateStock: (type: UploadType, updates: { id: string; qty: number }[]) => void;
+  onUpdateStock: (type: UploadType, updates: { isbn: string; qty: number }[]) => void;
 }
 
 export const UploadModal: React.FC<UploadModalProps> = ({
@@ -26,13 +26,13 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const title = uploadType === 'balance' ? 'Upload Stock Balance (Physical Count)' : 'Upload Extra PO Stock (In Transit)';
   const description =
     uploadType === 'balance'
-      ? 'Upload or paste CSV file with SKU Code and current physical stock balance counts.'
-      : 'Upload or paste CSV file with SKU Code and pending purchase order stock quantities in transit.';
+      ? 'Upload or paste CSV file with ISBN and current physical stock balance counts.'
+      : 'Upload or paste CSV file with ISBN and pending purchase order stock quantities in transit.';
 
   const handleDownloadSample = () => {
-    const header = 'sku,name,quantity\n';
+    const header = 'isbn,title,quantity\n';
     const rows = items
-      .map((item) => `${item.id},"${item.name}",${uploadType === 'balance' ? item.stockBalance : item.extraPoStock}`)
+      .map((item) => `${item.isbn},"${item.title}",${uploadType === 'balance' ? item.stockBalance : item.extraPoStock}`)
       .join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -66,32 +66,28 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         throw new Error('CSV file must have a header row and at least one data row.');
       }
 
-      // Detect delimiter & columns
-      const header = lines[0].toLowerCase();
-      const updates: { id: string; qty: number }[] = [];
+      const updates: { isbn: string; qty: number }[] = [];
 
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
-        // simple CSV split supporting quotes
         const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map((p) => p.replace(/^"|"$/g, '').trim());
         if (parts.length >= 2) {
-          const sku = parts[0];
-          // Find quantity in remaining columns (usually last column or index 2)
+          const isbn = parts[0];
           const qtyStr = parts[parts.length - 1];
           const qty = parseInt(qtyStr, 10);
 
-          if (sku && !isNaN(qty)) {
-            updates.push({ id: sku, qty: Math.max(0, qty) });
+          if (isbn && !isNaN(qty)) {
+            updates.push({ isbn, qty: Math.max(0, qty) });
           }
         }
       }
 
       if (updates.length === 0) {
-        throw new Error('No valid SKU and quantity records found in CSV.');
+        throw new Error('No valid ISBN and quantity records found in CSV.');
       }
 
       onUpdateStock(uploadType, updates);
-      setSuccessMsg(`Successfully updated ${updates.length} SKUs from uploaded file.`);
+      setSuccessMsg(`Successfully updated ${updates.length} book titles from uploaded file.`);
       setTimeout(() => {
         setSuccessMsg(null);
         onClose();
@@ -158,7 +154,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               </div>
               <div>
                 <p className="text-sm font-medium text-white">Click to browse or drag and drop your file</p>
-                <p className="text-xs text-slate-400 mt-1">Supports CSV format (SKU, Name, Quantity)</p>
+                <p className="text-xs text-slate-400 mt-1">Supports CSV format (ISBN, Title, Quantity)</p>
               </div>
               <button
                 type="button"
@@ -178,7 +174,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               rows={4}
               value={csvText}
               onChange={(e) => setCsvText(e.target.value)}
-              placeholder="sku,name,quantity&#10;SKU-001,Widget A,200&#10;SKU-002,Widget B,350"
+              placeholder="isbn,title,quantity&#10;978-0132350884,Clean Code,200&#10;978-0201633610,Design Patterns,350"
               className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
             />
             <div className="flex justify-end gap-3 pt-2">

@@ -11,7 +11,6 @@ interface ExportModalProps {
 export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, items }) => {
   if (!isOpen) return null;
 
-  // Calculate items needing order
   const reorderList = items
     .map((item) => {
       const deficit = item.minRequiredStock - item.stockBalance - item.extraPoStock;
@@ -25,11 +24,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, items
   const totalCost = reorderList.reduce((acc, item) => acc + item.orderQty * item.unitCost, 0);
 
   const handleDownloadCSV = () => {
-    const headers = 'SKU,Item Name,Supplier,Min Required,Stock Balance,Extra PO,Order Quantity,Unit Cost,Total Cost\n';
+    const headers = 'ISBN,Book Title,Publisher,Min Required,Stock Balance,Extra PO,Order Quantity,Unit Cost,Total Cost\n';
     const rows = reorderList
       .map(
         (i) =>
-          `"${i.id}","${i.name}","${i.supplier}",${i.minRequiredStock},${i.stockBalance},${i.extraPoStock},${i.orderQty},${i.unitCost},${(i.orderQty * i.unitCost).toFixed(2)}`
+          `"${i.isbn}","${i.title}","${i.supplier}",${i.minRequiredStock},${i.stockBalance},${i.extraPoStock},${i.orderQty},${i.unitCost},${(i.orderQty * i.unitCost).toFixed(2)}`
       )
       .join('\n');
 
@@ -37,7 +36,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, items
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `supplier_purchase_orders_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `supplier_book_purchase_orders_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -58,7 +57,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, items
             </div>
             <div>
               <h3 className="text-base font-semibold text-white">Supplier Purchase Order Report</h3>
-              <p className="text-xs text-slate-400">Generated from WMS Phase 1 Replenishment Engine</p>
+              <p className="text-xs text-slate-400">Generated from BookWMS Phase 1 Replenishment Engine</p>
             </div>
           </div>
           <button
@@ -76,8 +75,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, items
               <div className="w-12 h-12 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800 mx-auto flex items-center justify-center">
                 <CheckCircle className="w-6 h-6" />
               </div>
-              <h4 className="text-sm font-semibold text-white">All Stock Levels Sufficient</h4>
-              <p className="text-xs text-slate-400">No purchase orders are required at this time. All SKUs meet par levels.</p>
+              <h4 className="text-sm font-semibold text-white">All Book Stock Levels Sufficient</h4>
+              <p className="text-xs text-slate-400">No purchase orders are required at this time. All book titles meet par levels.</p>
             </div>
           ) : (
             <>
@@ -86,7 +85,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, items
                   <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
                   <div>
                     <p className="text-xs font-semibold text-amber-300">
-                      {reorderList.length} SKUs require immediate supplier reordering
+                      {reorderList.length} Book Titles require immediate supplier reordering
                     </p>
                     <p className="text-[11px] text-slate-400">Total estimated order cost: ${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
@@ -98,18 +97,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, items
                 <table className="w-full text-left border-collapse text-xs">
                   <thead className="bg-slate-950 sticky top-0 text-[11px] font-mono text-slate-400 uppercase">
                     <tr>
-                      <th className="p-3">SKU</th>
-                      <th className="p-3">Item Name</th>
-                      <th className="p-3">Supplier</th>
+                      <th className="p-3">ISBN</th>
+                      <th className="p-3">Book Title</th>
+                      <th className="p-3">Publisher</th>
                       <th className="p-3 text-right">Order Qty</th>
                       <th className="p-3 text-right">Est. Cost</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60 font-mono">
                     {reorderList.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-800/40">
-                        <td className="p-3 text-cyan-400 font-semibold">{item.id}</td>
-                        <td className="p-3 text-slate-200 font-sans">{item.name}</td>
+                      <tr key={item.isbn} className="hover:bg-slate-800/40">
+                        <td className="p-3 text-cyan-400 font-semibold">{item.isbn}</td>
+                        <td className="p-3 text-slate-200 font-sans">{item.title}</td>
                         <td className="p-3 text-slate-400 font-sans">{item.supplier}</td>
                         <td className="p-3 text-right font-bold text-amber-400">{item.orderQty.toLocaleString()}</td>
                         <td className="p-3 text-right text-slate-200">${(item.orderQty * item.unitCost).toFixed(2)}</td>
