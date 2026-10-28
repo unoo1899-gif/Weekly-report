@@ -1,0 +1,6 @@
+{
+  "name": "WMS Phase 1 Order Management",
+  "description": "Warehouse Management System Phase 1 for Order Management and Stock Replenishment calculations using Minimum Required Stock, Stock Balance, and Extra PO Stock upload tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
