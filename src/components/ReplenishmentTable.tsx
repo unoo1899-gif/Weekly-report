@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { InventoryItem } from '../types';
-import { Search, AlertTriangle, CheckCircle2, FileSpreadsheet, Download, Filter } from 'lucide-react';
+import { Search, AlertTriangle, CheckCircle2, FileSpreadsheet, Download, Filter, Flame } from 'lucide-react';
 
 interface ReplenishmentTableProps {
   items: InventoryItem[];
@@ -14,7 +14,7 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
   onOpenExportModal,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'insufficient' | 'sufficient'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'insufficient' | 'sufficient' | 'critical'>('all');
 
   // Core calculation engine
   const evaluatedItems = items.map((item) => {
@@ -22,12 +22,15 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
     const deficit = item.minRequiredStock - item.stockBalance - item.extraPoStock;
     const isInsufficient = deficit > 0;
     const orderQty = Math.max(0, deficit);
+    // Critical Low Stock: stock balance is below 20% of Minimum Required Stock
+    const isCriticalLow = item.stockBalance < 0.2 * item.minRequiredStock;
 
     return {
       ...item,
       deficit,
       isInsufficient,
       orderQty,
+      isCriticalLow,
     };
   });
 
@@ -39,12 +42,15 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
 
     if (filterStatus === 'insufficient') return matchesSearch && item.isInsufficient;
     if (filterStatus === 'sufficient') return matchesSearch && !item.isInsufficient;
+    if (filterStatus === 'critical') return matchesSearch && item.isCriticalLow;
     return matchesSearch;
   });
 
+  const criticalCount = evaluatedItems.filter(i => i.isCriticalLow).length;
+
   return (
     <div className="space-y-6">
-      {/* Upload Hub Banner (2 Prominent Icons/Buttons as requested) */}
+      {/* Upload Hub Banner */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Upload Stock Balance Box */}
         <div className="bg-gradient-to-br from-slate-900 to-cyan-950/30 border border-cyan-900/40 rounded-2xl p-6 shadow-sm flex items-center justify-between gap-4">
@@ -103,18 +109,27 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* Status Filter Tabs */}
-            <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto">
               <button
                 onClick={() => setFilterStatus('all')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${
                   filterStatus === 'all' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 All ({evaluatedItems.length})
               </button>
               <button
+                onClick={() => setFilterStatus('critical')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filterStatus === 'critical' ? 'bg-rose-950/80 text-rose-300 border border-rose-900' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
+                <span>Critical (&lt;20%) ({criticalCount})</span>
+              </button>
+              <button
                 onClick={() => setFilterStatus('insufficient')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${
                   filterStatus === 'insufficient' ? 'bg-amber-950/60 text-amber-300 border border-amber-900/60' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -122,7 +137,7 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
               </button>
               <button
                 onClick={() => setFilterStatus('sufficient')}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${
                   filterStatus === 'sufficient' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-900/60' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -170,12 +185,26 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
                     <tr
                       key={item.isbn}
                       className={`transition-colors hover:bg-slate-800/40 ${
-                        item.isInsufficient ? 'bg-amber-950/10' : ''
+                        item.isCriticalLow
+                          ? 'bg-rose-950/25 border-l-4 border-rose-500'
+                          : item.isInsufficient
+                          ? 'bg-amber-950/10'
+                          : ''
                       }`}
                     >
                       {/* ISBN / Title */}
                       <td className="py-4 px-6">
-                        <div className="font-mono text-cyan-400 font-semibold">{item.isbn}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-mono text-cyan-400 font-semibold">{item.isbn}</div>
+                          {item.isCriticalLow && (
+                            <span
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950 text-rose-400 text-[10px] font-bold uppercase tracking-wider border border-rose-800 shadow-sm animate-pulse"
+                              title="Critical Stock: Below 20% of Minimum Required Stock"
+                            >
+                              <Flame className="w-3 h-3" /> Critical &lt;20%
+                            </span>
+                          )}
+                        </div>
                         <div className="text-slate-100 font-medium mt-0.5">{item.title}</div>
                         <div className="text-[11px] text-slate-400 mt-0.5">Publisher: {item.supplier}</div>
                       </td>
@@ -186,8 +215,20 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
                       </td>
 
                       {/* Stock Balance */}
-                      <td className="py-4 px-6 text-right font-mono tabular-nums text-slate-300">
-                        {item.stockBalance.toLocaleString()}
+                      <td className="py-4 px-6 text-right font-mono tabular-nums">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {item.isCriticalLow && (
+                            <span title="Stock balance is below 20% of Minimum Required Stock">
+                              <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                            </span>
+                          )}
+                          <span className={item.isCriticalLow ? 'text-rose-400 font-bold' : 'text-slate-300'}>
+                            {item.stockBalance.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
+                          {((item.stockBalance / (item.minRequiredStock || 1)) * 100).toFixed(0)}% of par
+                        </div>
                       </td>
 
                       {/* Extra PO Stock */}
@@ -206,12 +247,18 @@ export const ReplenishmentTable: React.FC<ReplenishmentTableProps> = ({
                       <td className="py-4 px-6">
                         {item.isInsufficient ? (
                           <div className="inline-flex flex-col gap-1">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-950/80 border border-amber-800 text-amber-300 text-xs font-semibold shadow-sm">
-                              <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                              <span>Qty not sufficient and need to order from supplier</span>
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shadow-sm ${
+                              item.isCriticalLow
+                                ? 'bg-rose-950/90 border border-rose-800 text-rose-300'
+                                : 'bg-amber-950/80 border border-amber-800 text-amber-300'
+                            }`}>
+                              <AlertTriangle className={`w-3.5 h-3.5 shrink-0 ${item.isCriticalLow ? 'text-rose-400' : 'text-amber-400'}`} />
+                              <span>
+                                {item.isCriticalLow ? 'Critical Low Stock (<20%) - Order Required' : 'Qty not sufficient and need to order from supplier'}
+                              </span>
                             </span>
-                            <span className="text-[11px] text-amber-400/90 font-mono pl-1">
-                              Recommended PO Quantity: <strong className="underline">{item.orderQty.toLocaleString()} units</strong> (${(item.orderQty * item.unitCost).toFixed(2)})
+                            <span className="text-[11px] text-slate-300 font-mono pl-1">
+                              Recommended PO: <strong className="underline">{item.orderQty.toLocaleString()} units</strong> (${(item.orderQty * item.unitCost).toFixed(2)})
                             </span>
                           </div>
                         ) : (

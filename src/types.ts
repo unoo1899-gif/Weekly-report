@@ -2,6 +2,7 @@ export interface InventoryItem {
   isbn: string; // ISBN Code
   title: string; // Book Title
   category: string;
+  imprint?: string; // Publisher Imprint (CAMBRIDGE, MARSHALL CAVENDISH, OXFORD)
   minRequiredStock: number; // Preset Minimum Required Stock
   stockBalance: number; // Current physical inventory
   extraPoStock: number; // Outstanding PO stock in transit
