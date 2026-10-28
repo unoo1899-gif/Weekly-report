@@ -12,6 +12,24 @@ export interface InventoryItem {
   lastPoUpdate?: string;
 }
 
-export type ActiveTab = 'replenishment' | 'preset-stock' | 'inventory-ledger';
+export type UserRole = 'Administrator' | 'Warehouse Manager' | 'Inventory Operator' | 'Viewer';
+
+export interface User {
+  id: string;
+  username: string;
+  password?: string;
+  fullName: string;
+  role: UserRole;
+  permissions: {
+    canEditMinStock: boolean;
+    canUploadStock: boolean;
+    canManageCatalog: boolean;
+    canManageUsers: boolean;
+    canExportReports: boolean;
+  };
+  isActive: boolean;
+}
+
+export type ActiveTab = 'replenishment' | 'preset-stock' | 'inventory-ledger' | 'user-management';
 
 export type UploadType = 'balance' | 'po';
